@@ -137,7 +137,7 @@ app.get('/video-download', async (req, res) => {
     }
 })
 
-
+// --------- Dummy ------------
 app.get('/insta-download', async (req,res) => {
     const url = req.query.url;
 
@@ -173,20 +173,6 @@ app.get('/forced-download-image', (req, res) => {
     });
 });
 
-// app.get('/forced-download-video', (req, res) => {
-//     // const videoUrl = 'https://your-video-url.com/video.mp4';
-//     const { url } = req.query;
-    
-
-//     https.get(url, (videoRes) => {
-//         res.setHeader('Content-Disposition', 'attachment; filename="video.mp4"');
-//         res.setHeader('Content-Type', 'video/mp4');
-//         videoRes.pipe(res);
-//     }).on('error', (err) => {
-//         console.error('Error fetching the video:', err);
-//         res.status(500).send('Failed to download video.');
-//     });
-// });
 
 app.get('/download-video', (req, res) => {
     const {url} = req.query;
