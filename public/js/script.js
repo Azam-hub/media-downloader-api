@@ -79,15 +79,17 @@ $("form").submit(async function (e) {
                                 <a href="${jsonResponse.data.high}" download="download-image.jpg" class="forced-download">Download</a>
                             </div>
                             `;
+                    } else {
+                        alert("Unable to handle response")
                     }
                     $("#image-preview").html(html)
                 } else {
                     let html = "";
-                    if (jsonResponse.data.thumb && jsonResponse.data.images) {
+                    if (jsonResponse.data.thumb && jsonResponse.data.video) {
                         for (let i = 0; i < jsonResponse.data.thumb.length; i++) {
                             // createAndPlaceImage(jsonResponse.data.thumb[i])
                             let thumbnail = jsonResponse.data.thumb[i]
-                            let link = jsonResponse.data.images[i]
+                            let link = jsonResponse.data.video[i]
                             html += `
                             <div class="box">
                                 <img src="${thumbnail}" alt="">
@@ -106,6 +108,8 @@ $("form").submit(async function (e) {
                                 <a href="${jsonResponse.data.low}" download="video.mp4" class="forced-download-video">Download</a>
                             </div>
                             `;
+                    } else {
+                        alert("Unable to handle response")
                     }
                     $("#video-preview").html(html)
                 }
