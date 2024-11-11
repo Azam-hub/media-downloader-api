@@ -139,6 +139,8 @@ $(document).on("click", ".forced-download", async function (e) {
     window.location.href = `${app_url}forced-download-image?url=${imageUrl}`;
 })
 
+
+
 // $(document).on("click", ".forced-download-video", async function (e) {
 //     e.preventDefault()
 //     let videoUrl = $(this).attr("href")
