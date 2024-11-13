@@ -10,16 +10,19 @@ const https = require('https');
 const {alldown} = require("nayan-media-downloader");
 // const { twitterdown } = require("nayan-media-downloader")
 const {instagram} = require("nayan-media-downloader");
-
-
+// const {instagram} = require("nayan-media-downloader");
+const { ytdown } = require("nayan-media-downloader")
 
 
 const app = express();
 const PORT = 3000;
+
 app.use(express.static(path.join(__dirname, 'public')));
+
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 })
+
 
 app.get('/image-download', async (req, res) => {
     const { url } = req.query;
@@ -83,31 +86,6 @@ app.get('/image-download', async (req, res) => {
     }
 
 
-    // const savePath = path.join(__dirname, 'downloads', 'downloaded_image.jpg');
-    // try {
-    //     await downloadImage(url, savePath);
-    //     // res.download(savePath);
-
-    //     // Send the file to the client and then delete it from the server
-    //     res.download(savePath, 'downloaded_image.jpg', (err) => {
-    //         if (err) {
-    //             console.error('Error during download:', err);
-    //             res.status(500).send('Could not download the file.');
-    //         } else {
-    //             // Delete the file after sending it to the client
-    //             fs.unlink(savePath, (unlinkErr) => {
-    //                 if (unlinkErr) {
-    //                     console.error('Error deleting file:', unlinkErr);
-    //                 } else {
-    //                     console.log('File deleted successfully after download.');
-    //                 }
-    //             });
-    //         }
-    //     });
-
-    // } catch (error) {
-    //     res.status(500).json({ error: 'Failed to download image' });
-    // }
 });
 
 app.get('/video-download', async (req, res) => {
@@ -119,7 +97,6 @@ app.get('/video-download', async (req, res) => {
     try {
 
         // --------------------- All downloader from library --------------------------
-        // const lib_res = await alldown(url)
         let lib_res;
         if (url.includes("instagr")) {
             lib_res = await instagram(url)
@@ -154,9 +131,12 @@ app.get('/insta-download', async (req,res) => {
     // });
 
     // --------------------- All downloader --------------------------
-    alldown(url).then(data => {
-        console.log(data)
-    });
+    // alldown(url).then(data => {
+    //     console.log(data)
+    // });
+    let URL = await ytdown(url)
+    console.log(URL)
+    res.json(URL)
 
 });
 
@@ -169,7 +149,8 @@ app.get('/forced-download-image', (req, res) => {
         imageRes.pipe(res);
     }).on('error', (err) => {
         console.error('Error fetching the image:', err);
-        res.status(500).send('Failed to download image.');
+        // res.status(500).send('Failed to download image.');
+        res.status(500).json({ msg: 'Failed to download image' })   
     });
 });
 
