@@ -71,8 +71,6 @@ $("form").submit(async function (e) {
     targetDiv.scrollIntoView({ behavior: "smooth" });
 
     // Set loading at preview
-    $("#preview").addClass("centered-preview")
-    $("#preview").removeClass("grid-preview")
     $("#preview").html(`<div class="flex flex-col items-center gap-5">
                         <img src="src/loading_3.gif" class="w-24" alt="Loading GIF">
                         Please wait. It may take some time to fetch...
@@ -98,53 +96,218 @@ $("form").submit(async function (e) {
         if (form.id == "img-form") {
             apiUrl = `${app_url}image-download?url=${toDownloadUrl}`
             // console.log("api url definde");
-        } else {
-            apiUrl = `${app_url}video-download?url=${toDownloadUrl}`
-        }
-
-        try {
-            const response = await fetch(apiUrl, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            // Button loading handle (hiding)
-            $(form).find(".loading-gif").removeClass("inline")
-            $(form).find(".loading-gif").addClass("hidden")
-
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
     
-            // Check if the response is JSON (e.g., when there’s an error message)
-            const contentType = response.headers.get('content-type');
-            
-            // if response is in json rather than a download 
-            if (contentType && contentType.includes('application/json')) {
+                // Button loading handle (hiding)
+                $(form).find(".loading-gif").removeClass("inline")
+                $(form).find(".loading-gif").addClass("hidden")
+    
+        
+                // Check if the response is JSON (e.g., when there’s an error message)
+                const contentType = response.headers.get('content-type');
+                
+                // if response is in json rather than a download 
+                if (contentType && contentType.includes('application/json')) {
+    
+                    const jsonResponse = await response.json();
+    
+                    console.log(jsonResponse);
+                    
+                    let html = "";
+    
+                    // if response is of instagram 
+                    if (jsonResponse.data.thumb) {
+                        
+                        checkImagesAndReorder(jsonResponse.data.thumb).then((reorderedArray) => {
+                            
+    
+                            if (jsonResponse.data.images.length > 0 && jsonResponse.data.video.length > 0) {
+        
+                                for (let i = 0; i < jsonResponse.data.images.length; i++) {
+                                    // let thumbnail = jsonResponse.data.thumb[i]
+                                    let thumbnail = reorderedArray[i]
+                                    let img_link = jsonResponse.data.images[i]
+                                    html += `
+                                    <div class="box">
+                                        <img src="${thumbnail}" alt="">
+                                        <a href="${img_link}">Download</a>
+                                    </div>
+                                    `;
+                                }
+        
+        
+                                for (let i = 0; i < jsonResponse.data.video.length; i++) {
+                                    // let thumbnail = jsonResponse.data.thumb[i]
+                                    let video_link = jsonResponse.data.video[i]
+                                    html += `
+                                    <div class="box">
+                                        <h3 class="text-2xl font-bold mb-4">Download Video</h3>
+                                        <a href="${video_link}">Download</a>
+                                    </div>
+                                    `;
+                                }
+        
+        
+                            } else if (jsonResponse.data.images.length > 0) {
+                                
+                                for (let i = 0; i < reorderedArray.length; i++) {
+                                    // let thumbnail = jsonResponse.data.thumb[i]
+                                    let thumbnail = reorderedArray[i]
+                                    let link = jsonResponse.data.images[i]
+                                    html += `
+                                    <div class="box">
+                                        <img src="${thumbnail}" alt="">
+                                        <a href="${link}">Download</a>
+                                    </div>
+                                    `;
+                                }
+                            } else if (jsonResponse.data.video.length > 0) {
+                                for (let i = 0; i < reorderedArray.length; i++) {
+                                    // let thumbnail = jsonResponse.data.thumb[i]
+                                    let thumbnail = reorderedArray[i]
+                                    let link = jsonResponse.data.video[i]
+                                    html += `
+                                    <div class="box">
+                                        <h3 class="text-2xl font-bold mb-4">Download Video</h3>
+                                        <img src="${thumbnail}" alt="">
+                                        <a href="${link}">Download</a>
+                                    </div>
+                                    `;
+                                }
+                            }
+                            $("#preview").html(html)
+    
+                        });
+                    
+                    // if response if any social media except instagram
+                    } else if (jsonResponse.data.high && jsonResponse.data.low) {
+    
+                        html += `
+                            <div class="box">
+                                <h3 class="text-2xl font-bold mb-4">High Quality</h3>
+                                <img src="${jsonResponse.data.high}" alt="">
+                                <a href="${jsonResponse.data.high}" ${form.id == "img-form" ? 'class="forced-download"' : 'download="video.mp4"'}>Download</a>
+                            </div>
+                            <div class="box">
+                                <h3 class="text-2xl font-bold mb-4">Low Quality</h3>
+                                <img src="${jsonResponse.data.high}" alt="">
+                                <a href="${jsonResponse.data.high}" ${form.id == "img-form" ? 'class="forced-download"' : 'download="video.mp4"'}>Download</a>
+                            </div>
+                            `;
 
+                        $("#preview").html(html)
+                        
+                    } else {
+                        console.log(jsonResponse);
+                        // alert("Unable to handle response")
+                        html += `<div class="flex flex-col items-center gap-5 bg-red-100 py-5 px-8 rounded-lg">
+                            <i class="fa-solid fa-circle-exclamation text-5xl text-red-500"></i>
+                            <p>Unable to handle response. Please <a href="#" class="text-blue-500 underline">Report Here</a> so that we can resolve issue ASAP</p>
+                        </div>`
+
+                        $("#preview").html(html)
+    
+                    }
+                    
+                } else {
+                    // Otherwise, handle the response as a file download
+                    const blob = await response.blob();
+                    
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = 'downloaded_image.jpg';
+                    link.style.display = 'none';
+        
+                    document.body.appendChild(link);
+                    link.click();
+        
+                    URL.revokeObjectURL(link.href);
+                    document.body.removeChild(link);
+    
+                    $("#preview").html(`<div class="flex flex-col items-center gap-5 bg-green-100 py-5 px-10 rounded-lg">
+                            <i class="fa-solid fa-circle-check text-5xl text-green-500"></i>
+                            <p>File will be downloading soon.</p>
+                        </div>`)
+                }
+                
+                
+                
+            } catch (error) {
+                console.log('Error during download:', error);
+                // alert('Failed to download image');
+                $("#preview").html(`<div class="flex flex-col items-center gap-5 bg-red-100 py-5 px-8 rounded-lg">
+                            <i class="fa-solid fa-circle-exclamation text-5xl text-red-500"></i>
+                            <p>Failed to download image. Please <a href="#" class="text-blue-500 underline">Report Here</a> so that we can resolve issue ASAP</p>
+                        </div>`)
+            }
+        } else {
+
+            // let platform;
+            // if (toDownloadUrl.includes("facebook.com") || toDownloadUrl.includes("fb.com")) {
+            //     platform = "facebook";
+            // } else if (toDownloadUrl.includes("instagram.com") || toDownloadUrl.includes("instagr.am")) {
+            //     platform = "instagram";
+            // } else if (toDownloadUrl.includes("youtube.com") || toDownloadUrl.includes("youtu.be")) {
+            //     platform = "youtube";
+            // } else if (toDownloadUrl.includes("twitter.com")) {
+            //     platform = "twitter";
+            // } else if (toDownloadUrl.includes("tiktok.com")) {
+            //     platform = "tiktok";
+            // } else {
+            //     platform = "any";
+            // }
+
+            apiUrl = `${app_url}video-download?url=${toDownloadUrl}`
+            
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+    
+                // Button loading handle (hiding)
+                $(form).find(".loading-gif").removeClass("inline")
+                $(form).find(".loading-gif").addClass("hidden")
+    
+        
                 const jsonResponse = await response.json();
 
                 console.log(jsonResponse);
                 
                 let html = "";
 
-                // if response is of instagram 
-                if (jsonResponse.data.thumb) {
-                    $("#preview").removeClass("centered-preview")
-                    $("#preview").addClass("grid-preview")
+                if (jsonResponse.platform == "facebook") {
+                    html += `
+                    <div class="box">
+                        <h3 class="text-2xl font-bold mb-4">Download Video</h3>
+                        <img src="${jsonResponse.data[0].thumbnail}" alt="">`
 
-                    let arranged_thumb_arr;
+                        jsonResponse.data.forEach(element => {
+                            html += `<a href="${element.url}">Download ${element.resolution}</a>`
+                        });
+                    `</div>`
+                } else if (jsonResponse.platform == "instagram") {
+                    
                     checkImagesAndReorder(jsonResponse.data.thumb).then((reorderedArray) => {
-                        // console.log("Reordered array:", reorderedArray);
-                        arranged_thumb_arr = reorderedArray;
-
+                            
+    
                         if (jsonResponse.data.images.length > 0 && jsonResponse.data.video.length > 0) {
     
                             for (let i = 0; i < jsonResponse.data.images.length; i++) {
                                 // let thumbnail = jsonResponse.data.thumb[i]
-                                let thumbnail = arranged_thumb_arr[i]
+                                let thumbnail = reorderedArray[i]
                                 let img_link = jsonResponse.data.images[i]
                                 html += `
                                 <div class="box">
+                                    <h3 class="text-2xl font-bold mb-4">Download Image</h3>
                                     <img src="${thumbnail}" alt="">
                                     <a href="${img_link}">Download</a>
                                 </div>
@@ -157,7 +320,7 @@ $("form").submit(async function (e) {
                                 let video_link = jsonResponse.data.video[i]
                                 html += `
                                 <div class="box">
-                                    <h3>Download Video</h3>
+                                    <h3 class="text-2xl font-bold mb-4">Download Video</h3>
                                     <a href="${video_link}">Download</a>
                                 </div>
                                 `;
@@ -166,9 +329,9 @@ $("form").submit(async function (e) {
     
                         } else if (jsonResponse.data.images.length > 0) {
                             
-                            for (let i = 0; i < arranged_thumb_arr.length; i++) {
+                            for (let i = 0; i < reorderedArray.length; i++) {
                                 // let thumbnail = jsonResponse.data.thumb[i]
-                                let thumbnail = arranged_thumb_arr[i]
+                                let thumbnail = reorderedArray[i]
                                 let link = jsonResponse.data.images[i]
                                 html += `
                                 <div class="box">
@@ -178,12 +341,13 @@ $("form").submit(async function (e) {
                                 `;
                             }
                         } else if (jsonResponse.data.video.length > 0) {
-                            for (let i = 0; i < arranged_thumb_arr.length; i++) {
+                            for (let i = 0; i < reorderedArray.length; i++) {
                                 // let thumbnail = jsonResponse.data.thumb[i]
-                                let thumbnail = arranged_thumb_arr[i]
+                                let thumbnail = reorderedArray[i]
                                 let link = jsonResponse.data.video[i]
                                 html += `
                                 <div class="box">
+                                    <h3 class="text-2xl font-bold mb-4">Download Video</h3>
                                     <img src="${thumbnail}" alt="">
                                     <a href="${link}">Download</a>
                                 </div>
@@ -193,70 +357,69 @@ $("form").submit(async function (e) {
                         $("#preview").html(html)
 
                     });
-                
-                // if response if any social media except instagram
-                } else if (jsonResponse.data.high && jsonResponse.data.low) {
-                    $("#preview").removeClass("centered-preview")
-                    $("#preview").addClass("grid-preview")
 
+                } else if (jsonResponse.platform == "youtube") {
                     html += `
-                        <div class="box">
-                            <h3 class="text-2xl font-bold mb-4">High Quality</h3>
-                            <img src="${jsonResponse.data.high}" alt="">
-                            <a href="${jsonResponse.data.high}" ${form.id == "img-form" ? 'class="forced-download"' : 'download="video.mp4"'}>Download</a>
-                        </div>
-                        <div class="box">
-                            <h3 class="text-2xl font-bold mb-4">Low Quality</h3>
-                            <img src="${jsonResponse.data.high}" alt="">
-                            <a href="${jsonResponse.data.high}" ${form.id == "img-form" ? 'class="forced-download"' : 'download="video.mp4"'}>Download</a>
-                        </div>
-                        `;
-                } else {
-                    console.log(jsonResponse);
-                    // alert("Unable to handle response")
-                    html += `<div class="flex flex-col items-center gap-5 bg-red-100 py-5 px-8 rounded-lg">
-                        <i class="fa-solid fa-circle-exclamation text-5xl text-red-500"></i>
-                        <p>Unable to handle response. Please <a href="#" class="text-blue-500 underline">Report Here</a> so that we can resolve issue ASAP</p>
+                    <div class="box">
+                        <h3 class="text-2xl font-bold mb-4">Download Video</h3>
+                        <img src="${jsonResponse.data.thumb}" alt="">
+                        <p class="my-2 text-sm text-center">${jsonResponse.data.title}</p>
+                        <a href="${jsonResponse.data.video_hd}">Download 720p</a>
+                        <a href="${jsonResponse.data.video}">Download 480p</a>
+                        <a href="${jsonResponse.data.audio}">Download mp3</a>
                     </div>`
-
+                } else if (jsonResponse.platform == "twitter") {
+                    html += `
+                    <div class="box">
+                        <h3 class="text-2xl font-bold mb-4">Download Video</h3>
+                        <a href="${jsonResponse.data.HD}">Download High Quality</a>
+                        <a href="${jsonResponse.data.SD}">Download Normal Quality</a>
+                    </div>`
+                } else if (jsonResponse.platform == "tiktok") {
+                    html += `
+                    <div class="box">
+                        <h3 class="text-2xl font-bold mb-4">Download Video</h3>
+                        <img src="${jsonResponse.data.author.avatar}" alt="">
+                        <p class="my-2 text-sm text-center">${jsonResponse.data.title}</p>
+                        <a href="${jsonResponse.data.video}">Download Video (mp4)</a>
+                        <a href="${jsonResponse.data.audio}">Download Audio (mp3)</a>
+                    </div>`
+                } else if (jsonResponse.platform == "different") {
+                    
+                    html += `
+                    <div class="box">
+                        <h3 class="text-2xl font-bold mb-4">High Quality</h3>
+                        <img src="${jsonResponse.data.high}" alt="">
+                        <a href="${jsonResponse.data.high}" ${form.id == "img-form" ? 'class="forced-download"' : 'download="video.mp4"'}>Download</a>
+                    </div>
+                    <div class="box">
+                        <h3 class="text-2xl font-bold mb-4">Low Quality</h3>
+                        <img src="${jsonResponse.data.high}" alt="">
+                        <a href="${jsonResponse.data.high}" ${form.id == "img-form" ? 'class="forced-download"' : 'download="video.mp4"'}>Download</a>
+                    </div>
+                    `;
                 }
+
 
                 // if thumb is present then upper condition will render grid in preview
-                if (!jsonResponse.data.thumb) {
-                    $("#preview").html(html)
-                }
+                // if (!jsonResponse.data.thumb) {
+                //     $("#preview").html(html)
+                // }
+                $("#preview").html(html)
                 
-            } else {
-                // Otherwise, handle the response as a file download
-                const blob = await response.blob();
                 
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = 'downloaded_image.jpg';
-                link.style.display = 'none';
-    
-                document.body.appendChild(link);
-                link.click();
-    
-                URL.revokeObjectURL(link.href);
-                document.body.removeChild(link);
-
-                $("#preview").html(`<div class="flex flex-col items-center gap-5 bg-green-100 py-5 px-10 rounded-lg">
-                        <i class="fa-solid fa-circle-check text-5xl text-green-500"></i>
-                        <p>File will be downloading soon.</p>
-                    </div>`)
+                
+                
+            } catch (error) {
+                console.log('Error during download:', error);
+                // alert('Failed to download image');
+                $("#preview").html(`<div class="flex flex-col items-center gap-5 bg-red-100 py-5 px-8 rounded-lg">
+                            <i class="fa-solid fa-circle-exclamation text-5xl text-red-500"></i>
+                            <p>Failed to download video. Please <a href="#" class="text-blue-500 underline">Report Here</a> so that we can resolve issue ASAP</p>
+                        </div>`)
             }
-            
-            
-            
-        } catch (error) {
-            console.log('Error during download:', error);
-            // alert('Failed to download image');
-            $("#preview").html(`<div class="flex flex-col items-center gap-5 bg-red-100 py-5 px-8 rounded-lg">
-                        <i class="fa-solid fa-circle-exclamation text-5xl text-red-500"></i>
-                        <p>Failed to download image. Please <a href="#" class="text-blue-500 underline">Report Here</a> so that we can resolve issue ASAP</p>
-                    </div>`)
         }
+
     }
 })
 

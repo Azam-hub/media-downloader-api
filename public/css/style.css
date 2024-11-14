@@ -43,20 +43,22 @@
 
 .centered-preview {
     display: flex;
+    flex-wrap: wrap;
     min-height: 30vh;
     justify-content: center;
     align-items: center;
-}
-
-.grid-preview {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    column-gap: 25px;
+    column-gap: 3%;
     margin-top: 20px;
     row-gap: 18px;
 }
 
-.grid-preview .box {
+/* .centered-preview {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+} */
+
+.centered-preview .box {
+    flex: 0 0 30%;
     border: 1px solid #000;
     padding: 10px;
     border-radius: 10px;
@@ -66,12 +68,12 @@
     align-items: center;
 }
 
-.grid-preview .box img {
+.centered-preview .box img {
     width: 200px;
 }
 
 
-.grid-preview .box a {
+.centered-preview .box a {
     background-color: #000;
     color: #fff;
     text-decoration: none;
