@@ -17,10 +17,38 @@ const { alldown, ytdown, ndown, instagram, tikdown, twitterdown, fbdown, fbdown2
 const app = express();
 const PORT = 3000;
 
+
+app.set('view engine', 'ejs');
+app.set('views', './public/views');
+
+
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+// app.get("/", (req, res) => {
+//     res.sendFile(path.join(__dirname, 'public', 'index.html'));
+// })
+
+app.get('/', (req, res) => {
+    res.render('home'); // Render home.ejs
+});
+
+app.get("/youtube", (req, res) => {
+    res.render('youtube')
+})
+
+app.get("/facebook", (req, res) => {
+    // res.sendFile(path.join(__dirname, 'public', 'facebook.html'));
+    res.render('facebook')
+})
+
+app.get("/instagram", (req, res) => {
+    // res.sendFile(path.join(__dirname, 'public', 'instagram.html'));
+    res.render('instagram')
+})
+
+app.get("/tiktok", (req, res) => {
+    // res.sendFile(path.join(__dirname, 'public', 'tiktok.html'));
+    res.render('tiktok')
 })
 
 
@@ -270,9 +298,10 @@ app.get('/insta-download', async (req,res) => {
     // });
 
     // --------------------- All downloader --------------------------
-    // alldown(url).then(data => {
-    //     console.log(data)
-    // });
+    alldown(url).then(data => {
+        console.log(data)
+    res.json(URL)
+    });
     // let URL = await fbdown(url)
     
 
@@ -318,10 +347,10 @@ app.get('/insta-download', async (req,res) => {
     // const url = "link" // past url
     // let URL = await threads(url)
 
-    let URL = await ndown(url)
+    // let URL = await ndown(url)
 
-    console.log(URL)
-    res.json(URL)
+    // console.log(URL)
+    // res.json(URL)
 
 });
 
@@ -340,22 +369,22 @@ app.get('/forced-download-image', (req, res) => {
 });
 
 
-app.get('/download-video', (req, res) => {
-    const {url} = req.query;
+// app.get('/download-video', (req, res) => {
+//     const {url} = req.query;
     
 
-    https.get(url, (videoRes) => {
-        // Set the appropriate headers for video content
-        res.setHeader('Content-Disposition', 'attachment; filename="video.mp4"');
-        res.setHeader('Content-Type', 'video/mp4');
+//     https.get(url, (videoRes) => {
+//         // Set the appropriate headers for video content
+//         res.setHeader('Content-Disposition', 'attachment; filename="video.mp4"');
+//         res.setHeader('Content-Type', 'video/mp4');
         
-        // Pipe the video stream to the response
-        videoRes.pipe(res);
-    }).on('error', (err) => {
-        console.error('Error fetching the video:', err);
-        res.status(500).send('Failed to download video.');
-    });
-});
+//         // Pipe the video stream to the response
+//         videoRes.pipe(res);
+//     }).on('error', (err) => {
+//         console.error('Error fetching the video:', err);
+//         res.status(500).send('Failed to download video.');
+//     });
+// });
 
 
 app.listen(PORT, () => {
@@ -363,38 +392,3 @@ app.listen(PORT, () => {
 });
 
 
-
-
-// Workiung
-
-// const savePath = path.join(__dirname, 'downloads', 'downloaded_image.jpg');
-// try {
-//     await downloadImage(url, savePath);
-//     // res.download(savePath);
-
-//     // Send the file to the client and then delete it from the server
-//     res.download(savePath, 'downloaded_image.jpg', (err) => {
-//         if (err) {
-//             console.error('Error during download:', err);
-//             res.status(500).send('Could not download the file.');
-//         } else {
-//             // Delete the file after sending it to the client
-//             fs.unlink(savePath, (unlinkErr) => {
-//                 if (unlinkErr) {
-//                     console.error('Error deleting file:', unlinkErr);
-//                 } else {
-//                     console.log('File deleted successfully after download.');
-//                 }
-//             });
-//         }
-//     });
-
-// } catch (error) {
-//     res.status(500).json({ error: 'Failed to download image' });
-// }
-
-// and 
-
-// alldown(url).then(data => {
-//     console.log(data)
-// });

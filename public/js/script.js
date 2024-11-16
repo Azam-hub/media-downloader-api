@@ -1,30 +1,28 @@
 const app_url = "http://localhost:3000/";
 
-// Function to create and place an image in the document
-// function createAndPlaceImage(imageUrl) {
-//     // Create a new img element
-//     const img = document.createElement('img');
+
+
+if ($("#element").length != 0) {
+    var typed = new Typed('#element', {
+        strings: ['Facebook', 'Instagram', 'YouTube', 'Twitter', 'TikTok', 'Pinterest', 'Likee', "All Social Media"],
+        typeSpeed: 100,
+        backSpeed: 100,
+        backDelay: 1500,
+        smartBackspace: false, 
+    });
     
-//     // Set the src attribute to the provided image URL
-//     img.src = imageUrl;
+}
 
-//     // Optionally, set additional attributes like alt text or CSS styles
-//     img.alt = 'Image from JavaScript';
-//     img.style.width = '300px'; // example width
-//     img.style.height = 'auto'; // maintain aspect ratio
+$(document).on("click", ".bars", function () {
+    console.log($("header").css("height"));
 
-//     // Append the img element to the document body (or another container element)
-//     document.body.appendChild(img);
-// }
-
-var typed = new Typed('#element', {
-    strings: ['Facebook', 'Instagram', 'YouTube', 'Twitter', 'TikTok', 'Pinterest', 'Likee', "All Social Media"],
-    typeSpeed: 100,
-    backSpeed: 100,
-    backDelay: 1500,
-    smartBackspace: false, 
-});
-
+    if ($("header").css("height") == "56px") {
+        $("header").css("height", "fit-content")
+    } else {
+        $("header").css("height", "56px")
+    }
+    
+})
 
 function checkImageLoad(url) {
     return new Promise((resolve) => {
@@ -72,7 +70,7 @@ $("form").submit(async function (e) {
 
     // Set loading at preview
     $("#preview").html(`<div class="flex flex-col items-center gap-5">
-                        <img src="src/loading_3.gif" class="w-24" alt="Loading GIF">
+                        <img src="../src/loading_3.gif" class="w-24" alt="Loading GIF">
                         Please wait. It may take some time to fetch...
                     </div>`)
 
@@ -248,21 +246,6 @@ $("form").submit(async function (e) {
             }
         } else {
 
-            // let platform;
-            // if (toDownloadUrl.includes("facebook.com") || toDownloadUrl.includes("fb.com")) {
-            //     platform = "facebook";
-            // } else if (toDownloadUrl.includes("instagram.com") || toDownloadUrl.includes("instagr.am")) {
-            //     platform = "instagram";
-            // } else if (toDownloadUrl.includes("youtube.com") || toDownloadUrl.includes("youtu.be")) {
-            //     platform = "youtube";
-            // } else if (toDownloadUrl.includes("twitter.com")) {
-            //     platform = "twitter";
-            // } else if (toDownloadUrl.includes("tiktok.com")) {
-            //     platform = "tiktok";
-            // } else {
-            //     platform = "any";
-            // }
-
             apiUrl = `${app_url}video-download?url=${toDownloadUrl}`
             
             try {
@@ -364,10 +347,15 @@ $("form").submit(async function (e) {
                         <h3 class="text-2xl font-bold mb-4">Download Video</h3>
                         <img src="${jsonResponse.data.thumb}" alt="">
                         <p class="my-2 text-sm text-center">${jsonResponse.data.title}</p>
-                        <a href="${jsonResponse.data.video_hd}">Download 720p</a>
-                        <a href="${jsonResponse.data.video}">Download 480p</a>
-                        <a href="${jsonResponse.data.audio}">Download mp3</a>
-                    </div>`
+                        <a href="${jsonResponse.data.video_hd}" class="yt-element yt-video">Download 720p</a>
+                        <a href="${jsonResponse.data.video}" class="yt-element yt-video">Download 480p</a>
+                        <a href="${jsonResponse.data.audio}" class="yt-element yt-audio">Download mp3</a>
+                    </div>
+                    <div class="yt-media-container box !basis-[50%] !hidden">
+                        <h3 class="text-2xl font-bold mb-4">Download</h3>
+                        <div></div>
+                    </div>
+                    `
                 } else if (jsonResponse.platform == "twitter") {
                     html += `
                     <div class="box">
@@ -423,6 +411,33 @@ $("form").submit(async function (e) {
     }
 })
 
+
+$(document).on("click", ".yt-element", async function (e) {
+    e.preventDefault()
+    const mediaUrl = $(this).attr('href'); // Get the URL from the clicked anchor's href
+
+    // Create a media element (audio or video) based on the file type
+    let mediaElement;
+    if ($(this).hasClass("yt-audio")) {
+        mediaElement = $('<audio>', {
+            src: mediaUrl,
+            controls: true
+        });
+    } else {
+        mediaElement = $('<video>', {
+            src: mediaUrl,
+            controls: true
+        });
+    }
+
+    // Clear the previous media and append the new media element to the container
+    // $('.yt-media-container').html(`<div class="flex flex-col items-center border">
+    $('.yt-media-container').removeClass("!hidden");
+    $('.yt-media-container div').html(mediaElement);
+
+    // Play the media (auto-play)
+    mediaElement[0].play();
+})
 
 
 $(document).on("click", ".forced-download", async function (e) {
