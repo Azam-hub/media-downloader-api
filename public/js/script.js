@@ -2,6 +2,7 @@ const app_url = "http://localhost:3000/";
 
 
 
+/* TypedJS */
 if ($("#element").length != 0) {
     var typed = new Typed('#element', {
         strings: ['Facebook', 'Instagram', 'YouTube', 'Twitter', 'TikTok', 'Pinterest', 'Likee', "All Social Media"],
@@ -13,6 +14,7 @@ if ($("#element").length != 0) {
     
 }
 
+/* Mobile nav */
 $(document).on("click", ".bars", function () {
     console.log($("header").css("height"));
 
@@ -24,6 +26,7 @@ $(document).on("click", ".bars", function () {
     
 })
 
+/* Check image loadable or not */
 function checkImageLoad(url) {
     return new Promise((resolve) => {
         const img = new Image();
@@ -32,7 +35,7 @@ function checkImageLoad(url) {
         img.onerror = () => resolve(false);    // Image failed to load
     });
 }
-
+/* if image not load then transfer it at end */
 async function checkImagesAndReorder(thumbArray, maxRetries = 2) {
     const retryCount = {};  // Track retry attempts per URL
 
@@ -56,6 +59,7 @@ async function checkImagesAndReorder(thumbArray, maxRetries = 2) {
     return thumbArray;
 }
 
+/* Image and video form submit */
 $("form").submit(async function (e) {
     e.preventDefault();
 
@@ -85,7 +89,7 @@ $("form").submit(async function (e) {
 
     // Checking if url is empty or not
     if (toDownloadUrl == "") {
-        console.log("Please enter Link");
+        alert("Please enter Link");
     } else {
         console.log(toDownloadUrl);
         
@@ -98,7 +102,8 @@ $("form").submit(async function (e) {
                 const response = await fetch(apiUrl, {
                     method: 'GET',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        "Authorization": "Bearer 5af3bdd420956019b8b5c7b41b01c1183c58c453ba4bab7fa01991f15786b6d3",
                     }
                 });
     
@@ -190,12 +195,12 @@ $("form").submit(async function (e) {
                             <div class="box">
                                 <h3 class="text-2xl font-bold mb-4">High Quality</h3>
                                 <img src="${jsonResponse.data.high}" alt="">
-                                <a href="${jsonResponse.data.high}" ${form.id == "img-form" ? 'class="forced-download"' : 'download="video.mp4"'}>Download</a>
+                                <a href="${jsonResponse.data.high}" class="${form.id == "img-form" ? 'forced-download-image' : 'forced-download-video'}">Download</a>
                             </div>
                             <div class="box">
                                 <h3 class="text-2xl font-bold mb-4">Low Quality</h3>
                                 <img src="${jsonResponse.data.high}" alt="">
-                                <a href="${jsonResponse.data.high}" ${form.id == "img-form" ? 'class="forced-download"' : 'download="video.mp4"'}>Download</a>
+                                <a href="${jsonResponse.data.high}" class="${form.id == "img-form" ? 'forced-download-image' : 'forced-download-video'}">Download</a>
                             </div>
                             `;
 
@@ -252,7 +257,8 @@ $("form").submit(async function (e) {
                 const response = await fetch(apiUrl, {
                     method: 'GET',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        "Authorization": "Bearer 5af3bdd420956019b8b5c7b41b01c1183c58c453ba4bab7fa01991f15786b6d3", // Optional, only if frontend needs additional header
                     }
                 });
     
@@ -347,9 +353,9 @@ $("form").submit(async function (e) {
                         <h3 class="text-2xl font-bold mb-4">Download Video</h3>
                         <img src="${jsonResponse.data.thumb}" alt="">
                         <p class="my-2 text-sm text-center">${jsonResponse.data.title}</p>
-                        <a href="${jsonResponse.data.video_hd}" class="yt-element yt-video">Download 720p</a>
-                        <a href="${jsonResponse.data.video}" class="yt-element yt-video">Download 480p</a>
-                        <a href="${jsonResponse.data.audio}" class="yt-element yt-audio">Download mp3</a>
+                        <a href="${jsonResponse.data.video_hd}" class="forced-download-video">Download 720p</a>
+                        <a href="${jsonResponse.data.video}" class="forced-download-video">Download 480p</a>
+                        <a href="${jsonResponse.data.audio}" class="forced-download-audio">Download mp3</a>
                     </div>
                     <div class="yt-media-container box !basis-[50%] !hidden">
                         <h3 class="text-2xl font-bold mb-4">Download</h3>
@@ -369,8 +375,8 @@ $("form").submit(async function (e) {
                         <h3 class="text-2xl font-bold mb-4">Download Video</h3>
                         <img src="${jsonResponse.data.author.avatar}" alt="">
                         <p class="my-2 text-sm text-center">${jsonResponse.data.title}</p>
-                        <a href="${jsonResponse.data.video}">Download Video (mp4)</a>
-                        <a href="${jsonResponse.data.audio}">Download Audio (mp3)</a>
+                        <a href="${jsonResponse.data.video}" class="forced-download-video">Download Video (mp4)</a>
+                        <a href="${jsonResponse.data.audio}" class="forced-download-audio">Download Audio (mp3)</a>
                     </div>`
                 } else if (jsonResponse.platform == "different") {
                     
@@ -378,12 +384,12 @@ $("form").submit(async function (e) {
                     <div class="box">
                         <h3 class="text-2xl font-bold mb-4">High Quality</h3>
                         <img src="${jsonResponse.data.high}" alt="">
-                        <a href="${jsonResponse.data.high}" ${form.id == "img-form" ? 'class="forced-download"' : 'download="video.mp4"'}>Download</a>
+                        <a href="${jsonResponse.data.high}" class="${form.id == "img-form" ? 'forced-download-image' : 'forced-download-video'}">Download</a>
                     </div>
                     <div class="box">
                         <h3 class="text-2xl font-bold mb-4">Low Quality</h3>
                         <img src="${jsonResponse.data.high}" alt="">
-                        <a href="${jsonResponse.data.high}" ${form.id == "img-form" ? 'class="forced-download"' : 'download="video.mp4"'}>Download</a>
+                        <a href="${jsonResponse.data.high}" class="${form.id == "img-form" ? 'forced-download-image' : 'forced-download-video'}">Download</a>
                     </div>
                     `;
                 }
@@ -412,42 +418,91 @@ $("form").submit(async function (e) {
 })
 
 
-$(document).on("click", ".yt-element", async function (e) {
+/* Login to forcely download image, video and audio instead open in browser */
+$(document).on("click", ".forced-download-video", async function (e) {
     e.preventDefault()
     const mediaUrl = $(this).attr('href'); // Get the URL from the clicked anchor's href
+    // let type; // Get the URL from the clicked anchor's href
+    // if ($(this).hasClass('yt-audio')) {
+    //     type = "audio";
+    // } else {
+    // }
+    
+    const encodedUrl = encodeURIComponent(mediaUrl);
+    
+    let url = `/forced-download-video?url=${encodedUrl}`
+
+    // console.log(url);
+
+    window.location.href = url
+
+    // let apiUrl = `${app_url}forced-download-video?url=${encodedUrl}`
+
+    // try {
+    //     const response = await fetch(apiUrl);
+
+    //     if (!response.ok) {
+    //         throw new Error('Failed to download the video');
+    //     }
+
+    //     // Convert response to Blob
+    //     const blob = await response.blob();
+
+    //     // Create a link element
+    //     const link = document.createElement('a');
+    //     link.href = URL.createObjectURL(blob);
+    //     link.download = 'video.mp4'; // Set the downloaded file name
+
+    //     // Programmatically click the link to start download
+    //     document.body.appendChild(link);
+    //     link.click();
+
+    //     // Cleanup
+    //     URL.revokeObjectURL(link.href);
+    //     document.body.removeChild(link);
+    // } catch (error) {
+    //     console.error('Error:', error.message);
+    // }
+
 
     // Create a media element (audio or video) based on the file type
-    let mediaElement;
-    if ($(this).hasClass("yt-audio")) {
-        mediaElement = $('<audio>', {
-            src: mediaUrl,
-            controls: true
-        });
-    } else {
-        mediaElement = $('<video>', {
-            src: mediaUrl,
-            controls: true
-        });
-    }
+    // let mediaElement;
+    // if ($(this).hasClass("yt-audio")) {
+    //     mediaElement = $('<audio>', {
+    //         src: mediaUrl,
+    //         controls: true
+    //     });
+    // } else {
+    //     mediaElement = $('<video>', {
+    //         src: mediaUrl,
+    //         controls: true
+    //     });
+    // }
 
-    // Clear the previous media and append the new media element to the container
-    // $('.yt-media-container').html(`<div class="flex flex-col items-center border">
-    $('.yt-media-container').removeClass("!hidden");
-    $('.yt-media-container div').html(mediaElement);
+    // // Clear the previous media and append the new media element to the container
+    // // $('.yt-media-container').html(`<div class="flex flex-col items-center border">
+    // $('.yt-media-container').removeClass("!hidden");
+    // $('.yt-media-container div').html(mediaElement);
 
-    // Play the media (auto-play)
-    mediaElement[0].play();
+    // // Play the media (auto-play)
+    // mediaElement[0].play();
 })
 
+$(document).on("click", ".forced-download-audio", async function (e) {
+    e.preventDefault()
+    const mediaUrl = $(this).attr('href'); // Get the URL from the clicked anchor's href
+    
+    const encodedUrl = encodeURIComponent(mediaUrl);
+    
+    let url = `/forced-download-audio?url=${encodedUrl}`
 
-$(document).on("click", ".forced-download", async function (e) {
+    // console.log(url);
+
+    window.location.href = url
+})
+
+$(document).on("click", ".forced-download-image", async function (e) {
     e.preventDefault()
     let imageUrl = $(this).attr("href")
     window.location.href = `${app_url}forced-download-image?url=${imageUrl}`;
 })
-
-// $(document).on("click", ".forced-download-video", async function (e) {
-//     e.preventDefault()
-//     let videoUrl = $(this).attr("href")
-//     window.location.href = `${app_url}download-video?url=${videoUrl}`;
-// })

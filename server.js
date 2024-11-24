@@ -1,32 +1,97 @@
 // server.js
+require("dotenv").config(); // Load environment variables
 const express = require('express');
-const { downloadImage } = require('./puppeteerDownloader');
 const path = require('path');
 const fs = require('fs');
 const https = require('https');
+const { default: axios } = require('axios');
 
+const cors = require('cors');
+const rateLimit = require('express-rate-limit');
+const JavaScriptObfuscator = require('javascript-obfuscator');
 
-// const { ndown } = require("nayan-media-downloader")
-// const {} = require("nayan-media-downloader");
-// const { twitterdown } = require("nayan-media-downloader")
-// const {instagram} = require("nayan-media-downloader");
-// const {instagram} = require("nayan-media-downloader");
-const { alldown, ytdown, ndown, instagram, tikdown, twitterdown, fbdown, fbdown2, threads } = require("nayan-media-downloader")
+const { downloadImage } = require('./puppeteerDownloader');
 
+const { alldown, ytdown, ndown, instagram, tikdown, twitterdown, fbdown, fbdown2, threads } = require("nayan-media-downloader");
 
 const app = express();
-const PORT = 3000;
 
+
+/* -------------------------- Request limiter to limit request per IP -------------------------- */
+// Create a rate limiter
+const limiter = rateLimit({
+    windowMs: 60 * 1000, // 1 minute window
+    max: 100,            // Limit each IP to 100 requests per windowMs
+    message: 'Too many requests, please try again later.',
+    standardHeaders: true, // Include rate limit info in response headers
+    legacyHeaders: false,  // Disable the X-RateLimit-* headers
+});
+
+// Apply rate limiter to all routes
+app.use(limiter);
+
+
+/* ----------------------- Configuring Cors -------------------------- */
+
+// List of allowed origins (your frontend URL)
+// const allowedOrigins = ["http://localhost:3000/"];
+const allowedOrigins = [process.env.FRONTEND_DOMAIN];
+
+const corsOptions = {
+    origin: function (origin, callback) {
+        if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+            callback(null, true); // Allow the request
+        } else {
+            callback(new Error('Not allowed by CORS')); // Reject the request
+        }
+    },
+    methods: 'GET,POST', // Allow only specific HTTP methods
+    allowedHeaders: 'Content-Type,Authorization', // Allow only specific headers
+};
+
+app.use(cors(corsOptions));
+// app.options('*', cors(corsOptions));
+
+
+
+/* ----------------------- Securing routes through Key -------------------------- */
+const verifyApiKey = (req, res, next) => {
+    const apiKey = req.headers["authorization"];
+    const validApiKey = `Bearer ${process.env.API_KEY}`; // API_KEY stored in .env
+
+    if (apiKey !== validApiKey) {
+        return res.status(403).json({ error: "Forbidden: Invalid or missing API Key" });
+    }
+
+    next();  // API key is valid, move to the route handler
+};
+
+app.get('/obfuscator', (req, res) => {
+    // return res.status(400).json({ error: 'URL  is required' });
+    // Read the original JavaScript file
+    const code = fs.readFileSync('public/js/script.js', 'utf-8');
+
+    // Obfuscate the JavaScript code
+    const obfuscatedCode = JavaScriptObfuscator.obfuscate(code, {
+        compact: true,
+        controlFlowFlattening: true,  // Makes control flow more complex
+        controlFlowFlatteningThreshold: 1, // Optional: increase to make the code more obfuscated
+        stringArray: true, // Convert string literals to encoded strings
+        stringArrayThreshold: 0.75, // Percentage of strings to obfuscate
+    }).getObfuscatedCode();
+
+    // Write the obfuscated code to a new file
+    fs.writeFileSync('public/js/obfuscated-script.js', obfuscatedCode);
+});
+
+
+
+/* ------------ Handling routes pages START --------------- */
 
 app.set('view engine', 'ejs');
 app.set('views', './public/views');
 
-
 app.use(express.static(path.join(__dirname, 'public')));
-
-// app.get("/", (req, res) => {
-//     res.sendFile(path.join(__dirname, 'public', 'index.html'));
-// })
 
 app.get('/', (req, res) => {
     res.render('home'); // Render home.ejs
@@ -51,20 +116,101 @@ app.get("/tiktok", (req, res) => {
     res.render('tiktok')
 })
 
+/* ------------ Handling routes pages END --------------- */
 
-app.get('/image-download', async (req, res) => {
+
+
+// --------- Dummy (testing) ------------
+// app.get('/insta-download', async (req,res) => {
+//     const {url, platform} = req.query;
+
+//     if (!url) {
+//         return res.status(400).json({ error: 'insta URL parameter is required' });
+//     }
+//     console.log(url)
+
+
+//     // --------------------- ONly instagram downloader --------------------------
+//     // const link = "https://www.instagram.com/p/DCIxmeWzvZ3/?utm_source=ig_web_copy_link" //past video link
+//     // instagram(link).then(data => {
+//     //     console.log(data)
+//     // });
+
+//     // --------------------- All downloader --------------------------
+//     alldown(url).then(data => {
+//         console.log(data)
+//     res.json(URL)
+//     });
+//     // let URL = await fbdown(url)
+    
+
+//     // -------------------------------------
+
+//     // FB Video with quality and mp3
+//     // const key = "Nayan"
+//     // const cookie = "61564835831481"
+//     // let URL = await fbdown(url, cookie, key)
+
+
+//     // Youtube mp3 thumbnail
+//     // let URL = await ytdown(url)
+    
+
+//     // Insta
+//     // let URL = await instagram(url)
+
+
+//     // Twitter HD (720p) SD (480p)
+//     // let URL = await twitterdown(url)
+//     /* 
+//     Response like
+//     {
+//         "developer": "MOHAMMAD NAYAN",
+//         "devfb": "https://www.facebook.com/profile.php?id=100000959749712",
+//         "devwp": "wa.me/+8801615298449",
+//         "status": true,
+//         "data": {
+//             "HD": "https://video.twimg.com/ext_tw_video/1743351351898181632/pu/vid/avc1/810x720/gKWI2KEyLdRMQBFa.mp4?tag=12",
+//             "SD": "https://video.twimg.com/ext_tw_video/1743351351898181632/pu/vid/avc1/404x360/dtDrE8AqyxXhoRhO.mp4?tag=12"
+//         }
+//     }
+//     */
+
+//     // tiktok mp3 thumbnail
+//     // let URL = await tikdown(url)
+//     // console.log(URL)
+
+
+
+
+//     // const url = "link" // past url
+//     // let URL = await threads(url)
+
+//     // let URL = await ndown(url)
+
+//     // console.log(URL)
+//     // res.json(URL)
+
+// });
+
+
+/* --------------------------- Downloader for media START ---------------------- */
+
+app.get('/image-download', verifyApiKey, async (req, res) => {
     const { url } = req.query;
     if (!url) {
         return res.status(400).json({ error: 'URL parameter is required' });
     }
-
+    
     try {
 
         let lib_res;
         if (url.includes("instagr")) {
             lib_res = await instagram(url)
+        } else if (url.includes("pinterest")) {
+            lib_res = "pinterest"
         } else {
-            lib_res = await alldown(url)
+            lib_res = await alldown(url)                
         }
 
         // --------------------- All downloader from library --------------------------
@@ -74,7 +220,7 @@ app.get('/image-download', async (req, res) => {
         
         if (
             (lib_res.status == true && lib_res.data.title == "Facebook" && lib_res.data.low == undefined && lib_res.data.high == undefined) || 
-            (lib_res.status == false)
+            (lib_res.status == false) || (lib_res == "pinterest")
         ) 
         {
 
@@ -116,7 +262,7 @@ app.get('/image-download', async (req, res) => {
 
 });
 
-app.get('/video-download', async (req, res) => {
+app.get('/video-download', verifyApiKey, async (req, res) => {
     const { url } = req.query;
     if (!url) {
         return res.status(400).json({ error: 'URL parameter is required' });
@@ -274,86 +420,18 @@ app.get('/video-download', async (req, res) => {
         if (lib_res.status == true) {
             return res.status(200).json({ msg: 'Video has been downloaded', platform: platform, data: lib_res.data })   
         } else {
-            return res.status(500).json({ msg: 'Failed to download video' })   
+            return res.status(500).json({ error: 'Failed to download video', msg: lib_res.msg, err: lib_res.error,  })   
         }
     } catch (lib_err) {
         res.status(500).json({ error: 'Failed to download video' });
     }
 })
 
-// --------- Dummy ------------
-app.get('/insta-download', async (req,res) => {
-    const {url, platform} = req.query;
-
-    if (!url) {
-        return res.status(400).json({ error: 'insta URL parameter is required' });
-    }
-    console.log(url)
-
-
-    // --------------------- ONly instagram downloader --------------------------
-    // const link = "https://www.instagram.com/p/DCIxmeWzvZ3/?utm_source=ig_web_copy_link" //past video link
-    // instagram(link).then(data => {
-    //     console.log(data)
-    // });
-
-    // --------------------- All downloader --------------------------
-    alldown(url).then(data => {
-        console.log(data)
-    res.json(URL)
-    });
-    // let URL = await fbdown(url)
-    
-
-    // -------------------------------------
-
-    // FB Video with quality and mp3
-    // const key = "Nayan"
-    // const cookie = "61564835831481"
-    // let URL = await fbdown(url, cookie, key)
-
-
-    // Youtube mp3 thumbnail
-    // let URL = await ytdown(url)
-    
-
-    // Insta
-    // let URL = await instagram(url)
-
-
-    // Twitter HD (720p) SD (480p)
-    // let URL = await twitterdown(url)
-    /* 
-    Response like
-    {
-        "developer": "MOHAMMAD NAYAN",
-        "devfb": "https://www.facebook.com/profile.php?id=100000959749712",
-        "devwp": "wa.me/+8801615298449",
-        "status": true,
-        "data": {
-            "HD": "https://video.twimg.com/ext_tw_video/1743351351898181632/pu/vid/avc1/810x720/gKWI2KEyLdRMQBFa.mp4?tag=12",
-            "SD": "https://video.twimg.com/ext_tw_video/1743351351898181632/pu/vid/avc1/404x360/dtDrE8AqyxXhoRhO.mp4?tag=12"
-        }
-    }
-    */
-
-    // tiktok mp3 thumbnail
-    // let URL = await tikdown(url)
-    // console.log(URL)
+/* --------------------------- Downloader for media END ---------------------- */
 
 
 
-
-    // const url = "link" // past url
-    // let URL = await threads(url)
-
-    // let URL = await ndown(url)
-
-    // console.log(URL)
-    // res.json(URL)
-
-});
-
+/* --------------------------- Make sure that video or image will be download instead open in browser ---------------------- */
 
 app.get('/forced-download-image', (req, res) => {
     const { url } = req.query;
@@ -368,25 +446,78 @@ app.get('/forced-download-image', (req, res) => {
     });
 });
 
-
-// app.get('/download-video', (req, res) => {
-//     const {url} = req.query;
+app.get('/forced-download-video', async (req, res) => {
+    // const { url } = req.query
+    // if (!url) {
+    //     return res.status(400).json({ error: 'URL parameter is required' });
+    // }
+    // const decodedUrl = decodeURIComponent(url);
     
+    // try {
+    //     // Fetch the video stream from the remote server
+    //     const response = await axios.get(decodedUrl, { responseType: 'stream' });
 
-//     https.get(url, (videoRes) => {
-//         // Set the appropriate headers for video content
-//         res.setHeader('Content-Disposition', 'attachment; filename="video.mp4"');
-//         res.setHeader('Content-Type', 'video/mp4');
-        
-//         // Pipe the video stream to the response
-//         videoRes.pipe(res);
-//     }).on('error', (err) => {
-//         console.error('Error fetching the video:', err);
-//         res.status(500).send('Failed to download video.');
-//     });
-// });
+    //     // Set headers to force download
+    //     res.setHeader('Content-Disposition', 'attachment; filename="video.mp4"');
+    //     res.setHeader('Content-Type', 'video/mp4');
+
+    //     // Pipe the video stream to the response
+    //     response.data.pipe(res);
+    // } catch (error) {
+    //     console.error('Error downloading video:', error);
+    //     res.status(500).send('An error occurred while downloading the video.');
+    // }
+
+    const { url } = req.query;
+
+    if (!url) {
+        return res.status(400).json({ error: 'Parameter are required' });
+    }
+    const decodedUrl = decodeURIComponent(url);
+
+    try {
+        // Fetch the video stream from the remote server
+        const response = await axios.get(decodedUrl, { responseType: 'stream' });
+
+        // Set headers to force download
+        res.setHeader('Content-Disposition', 'attachment; filename="video.mp4"');
+        res.setHeader('Content-Type', 'video/mp4');
+
+        // Pipe the video stream to the response
+        response.data.pipe(res);
+    } catch (error) {
+        console.error('Error downloading video:', error);
+        res.status(500).send('An error occurred while downloading the video.');
+    }
+});
+
+app.get('/forced-download-audio', async (req, res) => {
+    const { url } = req.query;
+
+    if (!url) {
+        return res.status(400).json({ error: 'Parameter are required' });
+    }
+    const decodedUrl = decodeURIComponent(url);
+
+    try {
+        // Fetch the video stream from the remote server
+        const response = await axios.get(decodedUrl, { responseType: 'stream' });
+
+        // Set headers to force download
+        res.setHeader('Content-Disposition', 'attachment; filename="audio.mp3"');
+        res.setHeader('Content-Type', 'audio/mpeg');
 
 
+        // Pipe the video stream to the response
+        response.data.pipe(res);
+    } catch (error) {
+        console.error('Error downloading video:', error);
+        res.status(500).send('An error occurred while downloading the video.');
+    }
+});
+
+
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });

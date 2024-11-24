@@ -27,11 +27,11 @@
         <%- include('components/_header') %>
 
         <div class="flex w-full py-4 min-h-[100vh]">
-            <aside class="basis-[15%]"></aside>
-            <main class="basis-[70%]  px-6 py-7  rounded-lg ">
+            <aside class="basis-[15%] sm:block hidden"></aside>
+            <main class="sm:basis-[70%] basis-[100%]  px-6 py-7  rounded-lg ">
 
                 <div class="">
-                    <h1 class="font-semibold text-[34px]  flex gap-3 leading-[44px]">
+                    <h1 class="font-semibold sm:text-[34px] text-[28px]  flex gap-3 leading-[44px]">
                         <i class="fa-solid fa-quote-left text-4xl text-[--primary-color]"></i>
                         <span >
                             <span class="block">Online Image and Video Downloader for <span class="text-[--primary-color] font-extrabold text-4xl">Youtube</span></span>
@@ -73,7 +73,7 @@
 
                 <%- include('components/platform_row') %>
             </main>
-            <aside class="basis-[15%]"></aside>
+            <aside class="basis-[15%] sm:block hidden"></aside>
         </div>
 
     </div>
