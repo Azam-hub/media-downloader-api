@@ -34,8 +34,11 @@ app.use(limiter);
 /* ----------------------- Configuring Cors -------------------------- */
 
 // List of allowed origins (your frontend URL)
+
 // const allowedOrigins = ["http://localhost:3000/"];
-const allowedOrigins = [process.env.FRONTEND_DOMAIN];
+// const allowedOrigins = [process.env.FRONTEND_DOMAIN];
+
+const allowedOrigins = process.env.FRONTEND_DOMAINS.split(",");
 
 const corsOptions = {
     origin: function (origin, callback) {
