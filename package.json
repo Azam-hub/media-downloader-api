@@ -11,15 +11,13 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@juliendu11/instagram-downloader": "^0.2.0",
-    "@sasmeee/igdl": "^1.0.0",
     "axios": "^1.7.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "ejs": "^3.1.10",
     "express": "^4.21.1",
     "express-rate-limit": "^7.4.1",
-    "nayan-media-downloader": "^2.6.7",
+    "nayan-videos-downloader": "^0.0.9",
     "puppeteer": "^23.7.1"
   },
   "devDependencies": {

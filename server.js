@@ -12,7 +12,7 @@ const JavaScriptObfuscator = require('javascript-obfuscator');
 
 const { downloadImage } = require('./puppeteerDownloader');
 
-const { alldown, ytdown, ndown, instagram, tikdown, twitterdown, fbdown, fbdown2, threads } = require("nayan-media-downloader");
+const { alldown, ytdown, ndown, instagram, tikdown, twitterdown, fbdown, fbdown2, threads } = require("nayan-videos-downloader");
 
 const app = express();
 
