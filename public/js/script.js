@@ -1,4 +1,5 @@
-const app_url = "http://localhost:3000/";
+// const app_url = "http://localhost:3000/";
+const app_url = "https://media-downloader-api-production.up.railway.app/";
 
 
 
