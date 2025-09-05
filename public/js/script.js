@@ -1,5 +1,5 @@
-// const app_url = "http://localhost:3000/";
-const app_url = "https://media-downloader-api-production.up.railway.app/";
+const app_url = "http://localhost:3000/";
+// const app_url = "https://media-downloader-api-production.up.railway.app/";
 
 
 
@@ -297,7 +297,7 @@ $("form").submit(async function (e) {
                                 let img_link = jsonResponse.data.images[i]
                                 html += `
                                 <div class="box">
-                                    <h3 class="text-2xl font-bold mb-4">Download Image</h3>
+                                    <h3 class="text-2xl font-bold mb-4">Download</h3>
                                     <img src="${thumbnail}" alt="">
                                     <a href="${img_link}">Download</a>
                                 </div>
@@ -310,7 +310,7 @@ $("form").submit(async function (e) {
                                 let video_link = jsonResponse.data.video[i]
                                 html += `
                                 <div class="box">
-                                    <h3 class="text-2xl font-bold mb-4">Download Video</h3>
+                                    <h3 class="text-2xl font-bold mb-4">Download</h3>
                                     <a href="${video_link}">Download</a>
                                 </div>
                                 `;
@@ -337,7 +337,7 @@ $("form").submit(async function (e) {
                                 let link = jsonResponse.data.video[i]
                                 html += `
                                 <div class="box">
-                                    <h3 class="text-2xl font-bold mb-4">Download Video</h3>
+                                    <h3 class="text-2xl font-bold mb-4">Download</h3>
                                     <img src="${thumbnail}" alt="">
                                     <a href="${link}">Download</a>
                                 </div>

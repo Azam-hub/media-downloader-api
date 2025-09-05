@@ -12,7 +12,7 @@ const JavaScriptObfuscator = require('javascript-obfuscator');
 
 const { downloadImage } = require('./puppeteerDownloader');
 
-const { alldown, ytdown, ndown, instagram, tikdown, twitterdown, fbdown, fbdown2, threads } = require("nayan-videos-downloader");
+const { alldown, ytdown, ndown, instagram, tikdown, twitterdown, fbdown, fbdown2, threads } = require("nayan-media-downloaders");
 
 const app = express();
 
@@ -120,81 +120,6 @@ app.get("/tiktok", (req, res) => {
 })
 
 /* ------------ Handling routes pages END --------------- */
-
-
-
-// --------- Dummy (testing) ------------
-// app.get('/insta-download', async (req,res) => {
-//     const {url, platform} = req.query;
-
-//     if (!url) {
-//         return res.status(400).json({ error: 'insta URL parameter is required' });
-//     }
-//     console.log(url)
-
-
-//     // --------------------- ONly instagram downloader --------------------------
-//     // const link = "https://www.instagram.com/p/DCIxmeWzvZ3/?utm_source=ig_web_copy_link" //past video link
-//     // instagram(link).then(data => {
-//     //     console.log(data)
-//     // });
-
-//     // --------------------- All downloader --------------------------
-//     alldown(url).then(data => {
-//         console.log(data)
-//     res.json(URL)
-//     });
-//     // let URL = await fbdown(url)
-    
-
-//     // -------------------------------------
-
-//     // FB Video with quality and mp3
-//     // const key = "Nayan"
-//     // const cookie = "61564835831481"
-//     // let URL = await fbdown(url, cookie, key)
-
-
-//     // Youtube mp3 thumbnail
-//     // let URL = await ytdown(url)
-    
-
-//     // Insta
-//     // let URL = await instagram(url)
-
-
-//     // Twitter HD (720p) SD (480p)
-//     // let URL = await twitterdown(url)
-//     /* 
-//     Response like
-//     {
-//         "developer": "MOHAMMAD NAYAN",
-//         "devfb": "https://www.facebook.com/profile.php?id=100000959749712",
-//         "devwp": "wa.me/+8801615298449",
-//         "status": true,
-//         "data": {
-//             "HD": "https://video.twimg.com/ext_tw_video/1743351351898181632/pu/vid/avc1/810x720/gKWI2KEyLdRMQBFa.mp4?tag=12",
-//             "SD": "https://video.twimg.com/ext_tw_video/1743351351898181632/pu/vid/avc1/404x360/dtDrE8AqyxXhoRhO.mp4?tag=12"
-//         }
-//     }
-//     */
-
-//     // tiktok mp3 thumbnail
-//     // let URL = await tikdown(url)
-//     // console.log(URL)
-
-
-
-
-//     // const url = "link" // past url
-//     // let URL = await threads(url)
-
-//     // let URL = await ndown(url)
-
-//     // console.log(URL)
-//     // res.json(URL)
-
-// });
 
 
 /* --------------------------- Downloader for media START ---------------------- */
@@ -450,26 +375,6 @@ app.get('/forced-download-image', (req, res) => {
 });
 
 app.get('/forced-download-video', async (req, res) => {
-    // const { url } = req.query
-    // if (!url) {
-    //     return res.status(400).json({ error: 'URL parameter is required' });
-    // }
-    // const decodedUrl = decodeURIComponent(url);
-    
-    // try {
-    //     // Fetch the video stream from the remote server
-    //     const response = await axios.get(decodedUrl, { responseType: 'stream' });
-
-    //     // Set headers to force download
-    //     res.setHeader('Content-Disposition', 'attachment; filename="video.mp4"');
-    //     res.setHeader('Content-Type', 'video/mp4');
-
-    //     // Pipe the video stream to the response
-    //     response.data.pipe(res);
-    // } catch (error) {
-    //     console.error('Error downloading video:', error);
-    //     res.status(500).send('An error occurred while downloading the video.');
-    // }
 
     const { url } = req.query;
 

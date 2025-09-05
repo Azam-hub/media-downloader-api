@@ -17,8 +17,10 @@
     "ejs": "^3.1.10",
     "express": "^4.21.1",
     "express-rate-limit": "^7.4.1",
+    "nayan-media-downloaders": "^0.1.6",
     "nayan-videos-downloader": "^0.0.9",
-    "puppeteer": "^23.7.1"
+    "puppeteer": "^23.7.1",
+    "shaon-videos-downloader": "^1.0.1"
   },
   "devDependencies": {
     "javascript-obfuscator": "^4.1.1",
